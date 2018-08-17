@@ -3,7 +3,7 @@
 ;~ *****************************************************************************
 ;~ ******** Alter the games in the Arcade Soak Saftey Settings.ini file. *******
 ;~ *** You can create the .ini file, in the same name above, if it is lost. ****
-;~ *** Place on Desktop "C:\Users\Peter\Desktop\Arcade Safety Settings.ini" ****
+;~ *** Place at "C:\Emulators\Games\ArcadeSafety\Arcade Safety Settings.ini" ***
 ;~ ************* Example of settings in the .ini file is below. ****************
 ;~ *****************************************************************************
 ;~ ******** [FrontEndProgram]              *************************************
@@ -39,12 +39,12 @@
 #Include <WinAPI.au3>
 
 ;~ Reads single data items from the .ini and sets as variables.
-Global $readFEPexe = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "FrontEndProgram", "FEPexe", "Error")
-Global $readFEPwindow = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "FrontEndProgram", "FEPwindow", "Error")
-Global $readDelay = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "ExecutionDelayInMilliseconds", "ED", "Error")
-Global $readECGK = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "ExitCurrentGameKey", "ECGK", "Error")
-Global $readWCQ = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "WindowCLASSQuantity", "WCQ", "Error")
-Global $readQuantity = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "GameQuantity", "GQ", "Error")
+Global $readFEPexe = IniRead("C:\Emulators\Games\ArcadeSafety\Arcade Safety Settings.ini", "FrontEndProgram", "FEPexe", "Error")
+Global $readFEPwindow = IniRead("C:\Emulators\Games\ArcadeSafety\Arcade Safety Settings.ini", "FrontEndProgram", "FEPwindow", "Error")
+Global $readDelay = IniRead("C:\Emulators\Games\ArcadeSafety\Arcade Safety Settings.ini", "ExecutionDelayInMilliseconds", "ED", "Error")
+Global $readECGK = IniRead("C:\Emulators\Games\ArcadeSafety\Arcade Safety Settings.ini", "ExitCurrentGameKey", "ECGK", "Error")
+Global $readWCQ = IniRead("C:\Emulators\Games\ArcadeSafety\Arcade Safety Settings.ini", "WindowCLASSQuantity", "WCQ", "Error")
+Global $readQuantity = IniRead("C:\Emulators\Games\ArcadeSafety\Arcade Safety Settings.ini", "GameQuantity", "GQ", "Error")
 
 ;~ Variables
 Global $gamePID
@@ -65,13 +65,13 @@ HotKeySet($readECGK, "exitGameKey")
 
 ;~ Adds game .exe data from .ini file to the $gameList array.
 For $i = 0 To $readQuantity - 1
-   Global $readGame = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "GameListStartsAtZero", "G" & $i, "Error")
+   Global $readGame = IniRead("C:\Emulators\Games\ArcadeSafety\Arcade Safety Settings.ini", "GameListStartsAtZero", "G" & $i, "Error")
    _ArrayAdd($gameList, $readGame)
 Next
 
 ;~ Adds window class data from .ini file to the $windowClasses array.
 For $i = 0 To $readWCQ - 1
-   Global $readWC = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "WindowCLASSstartsAtZero", "WC" & $i, "Error")
+   Global $readWC = IniRead("C:\Emulators\Games\ArcadeSafety\Arcade Safety Settings.ini", "WindowCLASSstartsAtZero", "WC" & $i, "Error")
    _ArrayAdd($windowClasses, $readWC)
 Next
 
