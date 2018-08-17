@@ -3,35 +3,50 @@
 ;~ *****************************************************************************
 ;~ ******** Alter the games in the Arcade Soak Saftey Settings.ini file. *******
 ;~ *** You can create the .ini file, in the same name above, if it is lost. ****
-;~ *** Place on Desktop "C:\Users\Peter\Desktop\Arcade Safety Settings.ini" ****3
+;~ *** Place on Desktop "C:\Users\Peter\Desktop\Arcade Safety Settings.ini" ****
 ;~ ************* Example of settings in the .ini file is below. ****************
 ;~ *****************************************************************************
 ;~ ******** [FrontEndProgram]              *************************************
 ;~ ******** FEPexe="MaLa.exe"              *************************************
 ;~ ******** FEPwindow="MaLa"               *************************************
+;~ ********                                *************************************
 ;~ ******** [ExecutionDelayInMilliseconds] *************************************
 ;~ ******** ED="30000"                     *************************************
+;~ ********                                *************************************
+;~ ******** [ExitCurrentGameKey]           *************************************
+;~ ********	ECGK="33"                      *************************************
+;~ ********                                *************************************
+;~ ********	[WindowCLASSQuantity]          *************************************
+;~ ******** WCQ="1"                        *************************************
+;~ ********                                *************************************
+;~ ******** [WindowCLASSstartsAtZero]      *************************************
+;~ ******** WC0="[CLASS:UnityWndClass]"    *************************************
+;~ ********                                *************************************
 ;~ ******** [GameQuantity]                 *************************************
 ;~ ******** GQ="2"                         *************************************
+;~ ********                                *************************************
 ;~ ******** [GameListStartsAtZero]         *************************************
-;~ ******** G0="AGHR_SVAD.exe"             *************************************
-;~ ******** G1="BattleBuddies.exe"         *************************************
+;~ ******** G0="BattleBuddies.exe"         *************************************
+;~ ******** G1="Balloon Burst.exe"         *************************************
 ;~ *****************************************************************************
 ;~ ********* !!!!! DO NOT CHANGE ANY CODE BELOW THIS POINT!!!!! ****************
 ;~ *****************************************************************************
 
+;~ Libraries
 #include <Timers.au3>
 #include <Array.au3>
 #include <Misc.au3>
+#Include <WinAPI.au3>
+
+;~ Reads single data items from the .ini and sets as variables.
+Global $readFEPexe = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "FrontEndProgram", "FEPexe", "Error")
+Global $readFEPwindow = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "FrontEndProgram", "FEPwindow", "Error")
+Global $readDelay = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "ExecutionDelayInMilliseconds", "ED", "Error")
+Global $readECGK = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "ExitCurrentGameKey", "ECGK", "Error")
+Global $readWCQ = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "WindowCLASSQuantity", "WCQ", "Error")
+Global $readQuantity = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "GameQuantity", "GQ", "Error")
 
 ;~ Variables
-Global $readFEPexe = IniRead("Arcade Safety Settings.ini", "FrontEndProgram", "FEPexe", "Error")
-Global $readFEPwindow = IniRead("Arcade Safety Settings.ini", "FrontEndProgram", "FEPwindow", "Error")
-Global $readECGK = IniRead("Arcade Safety Settings.ini", "ExitCurrentGameKey", "ECGK", "Error")
-Global $readQuantity = IniRead("Arcade Safety Settings.ini", "GameQuantity", "GQ", "Error")
-Global $readWCQ = IniRead("Arcade Safety Settings.ini", "WindowCLASSQuantity", "WCQ", "Error")
-Global $readDelay = IniRead("Arcade Safety Settings.ini", "ExecutionDelayInMilliseconds", "ED", "Error")
-
 Global $gamePID
 Global $printFlag = 0
 Global $gameRunningFlag = 0
@@ -48,24 +63,21 @@ ConsoleWrite(@CRLF)
 ;~ Shortcut Key
 HotKeySet($readECGK, "exitGameKey")
 
-;~ Adds game .exe from .ini file to the array.
+;~ Adds game .exe data from .ini file to the $gameList array.
 For $i = 0 To $readQuantity - 1
-
-   Global $readGame = IniRead("Arcade Safety Settings.ini", "GameListStartsAtZero", "G" & $i, "Error")
+   Global $readGame = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "GameListStartsAtZero", "G" & $i, "Error")
    _ArrayAdd($gameList, $readGame)
-
 Next
 
+;~ Adds window class data from .ini file to the $windowClasses array.
 For $i = 0 To $readWCQ - 1
-
-   Global $readWC = IniRead("Arcade Safety Settings.ini", "WindowCLASSstartsAtZero", "WC" & $i, "Error")
+   Global $readWC = IniRead("C:\Users\Peter\Desktop\Arcade Safety Settings.ini", "WindowCLASSstartsAtZero", "WC" & $i, "Error")
    _ArrayAdd($windowClasses, $readWC)
-
 Next
 
 ;~ Debugging
-_ArrayDisplay($gameList)
-_ArrayDisplay($windowClasses)
+;~ _ArrayDisplay($gameList)
+;~ _ArrayDisplay($windowClasses)
 
 ;~ Starts running MaLa.
 Run($readFEPexe)
@@ -81,56 +93,54 @@ While ProcessExists($readFEPexe)
 		 $gameRunningFlag = 1
 		 $printFlag = 1
 
-;~ 		 Sets running game as active window.
 		 For $j = 0 To UBound ($windowClasses) - 1
+
+;~ 			Sets running game as focus window.
 			WinActivate($windowClasses[$j], "")
-
-;~ 			Condition: If current game closes abruptly set MaLa as active window.
-			If WinExists($windowClasses[$j], "") == 0 Then
-			   WinActivate($readFEPwindow)
-			   ProcessClose($gamePID)
-			   $gameRunningFlag = 0
-
+			If WinActive($windowClasses[$j], "") <> 0 Then
+			   ExitLoop
 			EndIf
 		 Next
 
-;~ 		 Condition: If inactivity time has been reached then game closes and sets MaLa as active window.
-		 If(_Timer_GetIdleTime()>$readDelay) Then
-			WinActivate($readFEPwindow)
-			ProcessClose($gamePID)
-			$gameRunningFlag = 0
-
-		 EndIf
-		 ExitLoop
-
-;~ 	  Condition: If no game is running, set MaLa as active window.
+;~ 	  Condition: If no game is running, set MaLa as focus window.
 	  ElseIf $gameRunningFlag = 0 Then
 		 WinActivate($readFEPwindow)
-;~ 		 ProcessClose($gamePID)
 		 $printFlag = 0
 
+;~ 	  Condition: If inactivity time has been reached, then the active game closes.
+	  ElseIf(_Timer_GetIdleTime()>$readDelay) Then
+		 ProcessClose($gamePID)
+		 $gameRunningFlag = 0
+
+;~ 	  Condition: If no game windows are open set MaLa as focus window.
+	  Else
+		 For $i = 0 To UBound ($windowClasses) - 1
+			If WinActive($windowClasses[$i], "") = 0 Then
+			   $gameRunningFlag = 0
+			EndIf
+		 Next
 	  EndIf
    Next
 
 ;~ Debugging
-   If $printFlag = 1 Then
-	  ConsoleWrite($gameList[$i] & " = " & $gamePID & @CRLF)
-   ElseIf $printFlag = 0 Then
-	  ConsoleWrite("No game started." & @CRLF)
-   EndIf
-   ConsoleWrite(@CRLF)
+;~    $hWnd = WinGetHandle("SlowDown")
+;~    ConsoleWrite(_WinAPI_GetClassName($hWnd) & @CRLF)
 
+;~    If $printFlag = 1 Then
+;~ 	  ConsoleWrite("Game on!" & @CRLF)
+;~    ElseIf $printFlag = 0 Then
+;~ 	  ConsoleWrite("No game started." & @CRLF)
+;~    EndIf
+;~    ConsoleWrite(@CRLF)
 WEnd
 
-;~ Checks is exit game key has been pressed.
+;~ Checks if exit game key has been pressed.
 Func exitGameKey()
    While 1
-;~    If exit game key has been pressed the game closes and sets MaLa as active window.
+;~    If exit game key has been pressed the active game closes.
 	  If _IsPressed($readECGK, $hDLL) Then
 		 While _IsPressed($readECGK, $hDLL)
-			WinActivate($readFEPwindow)
 			ProcessClose($gamePID)
-
 		 WEnd
 	  $gameRunningFlag = 0
 	  EndIf
