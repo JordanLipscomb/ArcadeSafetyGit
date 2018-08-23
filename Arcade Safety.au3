@@ -45,7 +45,6 @@ Global $readFEPrunning = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settin
 Global $readFEPwindow = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "FrontEndProgram", "FEPwindow", "Error")
 Global $readDelay = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "ExecutionDelayInMilliseconds", "ED", "Error")
 Global $readECGK = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "ExitCurrentGameKey", "ECGK", "Error")
-Global $readKL = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "ExitCurrentGameKey", "keyLabel", "Error")
 Global $readWCQ = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "WindowCLASSQuantity", "WCQ", "Error")
 Global $readQuantity = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "GameQuantity", "GQ", "Error")
 
@@ -54,16 +53,13 @@ Global $gamePID
 Global $windowClass
 Global $gameList[0]
 Global $windowClasses[0]
+Local $hDLL = DllOpen("user32.dll")
 
 ;~ Debugging
 ConsoleWrite($readFEPexe  & @CRLF)
 ConsoleWrite($readFEPrunning  & @CRLF)
 ConsoleWrite($readFEPwindow & @CRLF)
 ConsoleWrite($readQuantity & @CRLF)
-ConsoleWrite(@CRLF)
-
-;~ Shortcut Key
-HotKeySet($readKL, "exitGameKey")
 
 ;~ Adds game .exe data from .ini file to the $gameList array.
 For $i = 0 To $readQuantity - 1
@@ -83,8 +79,8 @@ Next
 
 ;~ Starts running MaLa.
 Run($readFEPexe)
-Sleep(5000)
-WinActivate($readFEPwindow)
+;~ Sleep(10000)
+;~ WinActivate($readFEPwindow)
 
 ;~ Checks for certian conditions while MaLa is running; "Conditions" in the comments below.
 While ProcessExists($readFEPrunning)
@@ -93,27 +89,36 @@ While ProcessExists($readFEPrunning)
    For $i = 0 To UBound ($gameList) - 1
 	  If ProcessExists($gameList[$i]) <> 0 Then
 		 $gamePID = ProcessExists($gameList[$i])
+
+;~ 		 If running game is found, sets current game as focus window.
+		 For $j = 0 To UBound ($windowClasses) - 1
+			If WinActive($windowClasses[$j]) <> 0 Then
+			   $windowClass = WinActive($windowClasses[$j])
+			   WinActivate($windowClass, "")
+			   ExitLoop
+			EndIf
+		 Next
 		 ExitLoop
 	  EndIf
    Next
 
-;~    Sets current game as focus unless the game shuts down abruptly.
-   For $i = 0 To UBound ($windowClasses) - 1
-	  If WinActive($windowClasses[$i]) <> 0 Then
-		 $windowClass = WinActive($windowClasses[$i])
-		 WinActivate($windowClass, "")
-		 ExitLoop
-	  EndIf
-   Next
-
-;~ 	  Condition: If inactivity time has been reached, then the active game closes.
-   If(_Timer_GetIdleTime()>$readDelay) Then
-	  If $gamePID <> 0 Then
-		 ProcessClose($gamePID)
-		 $gamePID = 0
-		 $windowClass = 0
-	  EndIf
+;~    Condition: If exit key is pressed while game is running, close game and focus MaLa
+   If _IsPressed($readECGK, $hDLL) And $gamePID <> 0 Then
+	  ProcessClose($gamePID)
 	  WinActivate($readFEPwindow)
+	  $windowClass = 0
+	  $gamePID = 0
+;~ 	  ConsoleWrite("Exit key pressed" & @CRLF)
+   EndIf
+
+
+;~ 	  Condition: If inactivity time has been reached while game is running, close game and focus MaLa
+   If(_Timer_GetIdleTime()>$readDelay) And $gamePID <> 0 Then
+	  ProcessClose($gamePID)
+	  WinActivate($readFEPwindow)
+	  $windowClass = 0
+	  $gamePID = 0
+;~ 	  ConsoleWrite("Inactivity time reached" & @CRLF)
    EndIf
 
 ;~ Debugging
@@ -122,17 +127,4 @@ While ProcessExists($readFEPrunning)
 ;~    ConsoleWrite($gamePID & @CRLF)
 ;~    ConsoleWrite($windowClass & @CRLF)
 WEnd
-
-;~ Checks if exit game key has been pressed.
-Func exitGameKey()
-   While 1
-;~    If exit game key has been pressed the active game closes and sets Mala as focus window.
-	  If _IsPressed($readECGK) Then
-		 ProcessClose($gamePID)
-		 $windowClass = 0
-		 $gamePID = 0
-		 WinActivate($readFEPwindow)
-		 ExitLoop
-	  EndIf
-   WEnd
-EndFunc
+DllClose($hDLL)
