@@ -49,12 +49,13 @@ Global $readWCQ = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini"
 Global $readQuantity = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "GameQuantity", "GQ", "Error")
 
 ;~ Variables
+Global $gameName
 Global $gamePID
 Global $windowClass
-Global $gameWindow = 0
+Global $stageFlag = 0
 Global $gameList[0]
 Global $windowClasses[0]
-Local $hDLL = DllOpen("user32.dll")
+Global $hDLL
 
 ;~ Debugging
 ;~ ConsoleWrite($readFEPexe  & @CRLF)
@@ -80,60 +81,87 @@ Next
 
 ;~ Starts running MaLa and sets it as focus window after a delay.
 Run($readFEPexe)
-Sleep(10000)
+Sleep(30000)
 WinActivate($readFEPwindow)
 
 ;~ Checks for certian conditions while MaLa is running.
 While ProcessExists($readFEPrunning)
 
-;~    Finds a running game from the game list.
-   For $i = 0 To UBound ($gameList) - 1
-	  If ProcessExists($gameList[$i]) <> 0 Then
-		 $gamePID = ProcessExists($gameList[$i])
+;~    Stage 0: Find a running game stage.
+   If $stageFlag = 0 Then
 
-;~ 		 Find runnings game's window.
-		 For $j = 0 To UBound ($windowClasses) - 1
-			If WinActive($windowClasses[$j]) <> 0 Then
-			   $windowClass = WinActive($windowClasses[$j])
-			   ExitLoop
-			EndIf
-		 Next
-		 ExitLoop
-	  EndIf
-   Next
+;~ 	  Finds a running game from the game list.
+	  For $i = 0 To UBound ($gameList) - 1
+		 If ProcessExists($gameList[$i]) <> 0 Then
+			$gamePID = ProcessExists($gameList[$i])
+			$gameName = $gameList[$i]
+			$stageFlag = 1
+			ExitLoop
+		 EndIf
+	  Next
+   EndIf
 
-;~    If running game window is found, set running game as focus window and trap mouse offscreen.
-   If $gamePID <> 0 And Not @error Then
+;~    Stage 1: Find game window and focus it.
+   If $stageFlag = 1 Then
+
+;~ 	  Find runnings game's window.
+	  For $j = 0 To UBound ($windowClasses) - 1
+		 If WinActive($windowClasses[$j]) <> 0 Then
+			$windowClass = WinActive($windowClasses[$j])
+			WinActivate($windowClass, "")
+			$hDLL = DllOpen("user32.dll")
+			$stageFlag = 2
+			ExitLoop
+		 EndIf
+	  Next
+   EndIf
+
+;~    Stage 2: Game is running and checks for exit conditions.
+   If $stageFlag = 2 Then
+
+;~    Set running game as focus window.
 	  WinActivate($windowClass, "")
-	  $gameWindow = WinGetPos($windowClass)
-	  _MouseTrap($gameWindow[0]+1366, $gameWindow[1], $gameWindow[0] + $gameWindow[2], $gameWindow[1] + $gameWindow[3])
-   EndIf
 
-;~    If exit key is pressed while game is running, close game and focus MaLa
-   If _IsPressed($readECGK, $hDLL) And $gamePID <> 0 Then
-	  ProcessClose($gamePID)
-	  WinActivate($readFEPwindow)
-	  _MouseTrap()
-	  $windowClass = 0
-	  $gamePID = 0
-;~ 	  ConsoleWrite("Exit key pressed" & @CRLF)
-   EndIf
+;~ 	  If exit key is pressed while game is running, close game and focus MaLa.
+	  If _IsPressed($readECGK, $hDLL) And $gamePID <> 0 Then
+		 ProcessClose($gamePID)
+		 WinActivate($readFEPwindow)
+		 $windowClass = 0
+		 $gamePID = 0
+		 $gameName = 0
+		 $stageFlag = 0
+		 DllClose($hDLL)
+;~ 		 ConsoleWrite("Exit key pressed" & @CRLF)
 
+;~ 	  If game closes abruptly, close game and focus MaLa.
+	  ElseIf ProcessExists($gameName) = 0 Then
+		 ProcessClose($gamePID)
+		 WinActivate($readFEPwindow)
+		 $windowClass = 0
+		 $gamePID = 0
+		 $gameName = 0
+		 $stageFlag = 0
+		 DllClose($hDLL)
+;~ 		 ConsoleWrite("Game closed abruptly." & @CRLF)
+	  EndIf
 
-;~ 	  If inactivity time has been reached while game is running, close game and focus MaLa
-   If(_Timer_GetIdleTime()>$readDelay) And $gamePID <> 0 Then
-	  ProcessClose($gamePID)
-	  WinActivate($readFEPwindow)
-	  _MouseTrap()
-	  $windowClass = 0
-	  $gamePID = 0
-;~ 	  ConsoleWrite("Inactivity time reached" & @CRLF)
+;~ 	  If inactivity time has been reached while game is running, close game and focus MaLa.
+	  If(_Timer_GetIdleTime()>$readDelay) And $gamePID <> 0 Then
+		 ProcessClose($gamePID)
+		 WinActivate($readFEPwindow)
+		 $windowClass = 0
+		 $gamePID = 0
+		 $gameName = 0
+		 $stageFlag = 0
+		 DllClose($hDLL)
+;~ 		 ConsoleWrite("Inactivity time reached" & @CRLF)
+	  EndIf
    EndIf
 
 ;~ Debugging
-;~    $hWnd = WinGetHandle("SlowDown")
+;~    $hWnd = WinGetHandle("SA Build")
 ;~    ConsoleWrite(_WinAPI_GetClassName($hWnd) & @CRLF)
+;~    ConsoleWrite($gameName & @CRLF)
 ;~    ConsoleWrite($gamePID & @CRLF)
 ;~    ConsoleWrite($windowClass & @CRLF)
 WEnd
-DllClose($hDLL)
