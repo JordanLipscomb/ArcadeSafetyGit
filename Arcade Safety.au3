@@ -81,14 +81,14 @@ Next
 
 ;~ Starts running MaLa and sets it as focus window after a delay.
 Run($readFEPexe)
-Sleep(30000)
-WinActivate($readFEPwindow)
+;~ Sleep(30000)
+;~ WinActivate($readFEPwindow)
 
 ;~ Checks for certian conditions while MaLa is running.
 While ProcessExists($readFEPrunning)
 
 ;~    Stage 0: Find a running game stage.
-   If $stageFlag = 0 Then
+   If $stageFlag = 0 And (_Timer_GetIdleTime()<$readDelay) Then
 
 ;~ 	  Finds a running game from the game list.
 	  For $i = 0 To UBound ($gameList) - 1
@@ -98,6 +98,7 @@ While ProcessExists($readFEPrunning)
 			$stageFlag = 1
 			ExitLoop
 		 EndIf
+;~ 		 ConsoleWrite("Game search running" & @CRLF)
 	  Next
    EndIf
 
