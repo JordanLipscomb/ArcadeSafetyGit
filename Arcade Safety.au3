@@ -50,13 +50,13 @@ Global $readQuantity = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings
 
 ;~ Variables
 Global $gamePID = 0
-Global $windowName = 0
+Global $hTimer = 0
+Global $fDiff = 0
 Global $stageFlag = 0
-Global $gameList[0]
-Global $windowClasses[0]
-Global $hDLL
-Global $hTimer
-Global $fDiff
+Global $windowName = ""
+Global $hDLL = ""
+Global $gameList[""]
+Global $windowClasses[""]
 
 ;~ Debugging
 ;~ ConsoleWrite($readFEPexe  & @CRLF)
@@ -92,13 +92,16 @@ While ProcessExists($readFEPrunning)
    $fDiff = TimerDiff($hTimer)
 ;~    Sets Mala as focus when time is reached
    If $fDiff > $readDelay And $stageFlag = 0 Then
-	  WinActivate($readFEPwindow)
 	  ProcessClose($gamePID)
+	  WinActivate($readFEPwindow)
+	  $windowName = ""
+	  $gamePID = 0
+	  DllClose($hDLL)
 	  $hTimer = TimerInit()
    EndIf
 
 ;~    Stage 0: Find a running game stage.
-   If $stageFlag = 0 And (_Timer_GetIdleTime()<$readDelay) Then
+   If $stageFlag = 0 Then
 
 ;~ 	  Finds a running game from the game list.
 	  For $i = 0 To UBound ($gameList) - 1
@@ -137,7 +140,7 @@ While ProcessExists($readFEPrunning)
 	  If _IsPressed($readECGK, $hDLL) And $gamePID <> 0 Then
 		 ProcessClose($gamePID)
 		 WinActivate($readFEPwindow)
-		 $windowName = 0
+		 $windowName = ""
 		 $gamePID = 0
 		 $stageFlag = 0
 		 DllClose($hDLL)
@@ -147,7 +150,7 @@ While ProcessExists($readFEPrunning)
 	  ElseIf ProcessExists($gamePID) = 0 Then
 		 ProcessClose($gamePID)
 		 WinActivate($readFEPwindow)
-		 $windowName = 0
+		 $windowName = ""
 		 $gamePID = 0
 		 $stageFlag = 0
 		 DllClose($hDLL)
@@ -158,7 +161,7 @@ While ProcessExists($readFEPrunning)
 	  If(_Timer_GetIdleTime()>$readDelay) Then
 		 ProcessClose($gamePID)
 		 WinActivate($readFEPwindow)
-		 $windowName = 0
+		 $windowName = ""
 		 $gamePID = 0
 		 $stageFlag = 0
 		 DllClose($hDLL)
