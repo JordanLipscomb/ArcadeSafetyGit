@@ -44,6 +44,7 @@ Global $readFEPexe = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.i
 Global $readFEPrunning = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "FrontEndProgram", "FEPrunning", "Error")
 Global $readFEPwindow = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "FrontEndProgram", "FEPwindow", "Error")
 Global $readDelay = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "ExecutionDelayInMilliseconds", "ED", "Error")
+Global $focusDelay = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "ExecutionDelayInMilliseconds", "EDtwo", "Error")
 Global $readECGK = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "ExitCurrentGameKey", "ECGK", "Error")
 Global $readWCQ = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "WindowCLASSQuantity", "WCQ", "Error")
 Global $readQuantity = IniRead("C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini", "GameQuantity", "GQ", "Error")
@@ -63,6 +64,7 @@ Global $windowClasses[""]
 ;~ ConsoleWrite($readFEPrunning  & @CRLF)
 ;~ ConsoleWrite($readFEPwindow & @CRLF)
 ;~ ConsoleWrite($readQuantity & @CRLF & @CRLF)
+;~ ConsoleWrite($focusDelay & @CRLF & @CRLF)
 
 ;~ Adds game .exe data from .ini file to the $gameList array.
 For $i = 0 To $readQuantity - 1
@@ -83,22 +85,9 @@ Next
 ;~ Starts running MaLa and sets it as focus window after a delay.
 Run($readFEPexe)
 $hTimer = TimerInit()
-;~ Sleep(30000)
-;~ WinActivate($readFEPwindow)
 
 ;~ Checks for certian conditions while MaLa is running.
 While ProcessExists($readFEPrunning)
-
-   $fDiff = TimerDiff($hTimer)
-;~    Sets Mala as focus when time is reached
-   If $fDiff > $readDelay And $stageFlag = 0 Then
-	  ProcessClose($gamePID)
-	  WinActivate($readFEPwindow)
-	  $windowName = ""
-	  $gamePID = 0
-	  DllClose($hDLL)
-	  $hTimer = TimerInit()
-   EndIf
 
 ;~    Stage 0: Find a running game stage.
    If $stageFlag = 0 Then
@@ -113,6 +102,17 @@ While ProcessExists($readFEPrunning)
 		 EndIf
 ;~ 		 ConsoleWrite("Game search running" & $i & @CRLF)
 	  Next
+
+;~ 	  Sets Mala as focus when time is reached
+	  $fDiff = TimerDiff($hTimer)
+	  If $fDiff > $focusDelay Then
+		 ProcessClose($gamePID)
+		 WinActivate($readFEPwindow)
+		 $windowName = ""
+		 $gamePID = 0
+		 DllClose($hDLL)
+		 $hTimer = TimerInit()
+	  EndIf
    EndIf
 
 ;~    Stage 1: Find game window and focus it.
@@ -128,6 +128,14 @@ While ProcessExists($readFEPrunning)
 			ExitLoop
 		 EndIf
 	  Next
+	  If (_Timer_GetIdleTime()>$readDelay) Then
+		 ProcessClose($gamePID)
+		 WinActivate($readFEPwindow)
+		 $windowName = ""
+		 $gamePID = 0
+		 $stageFlag = 0
+		 DllClose($hDLL)
+	  EndIf
    EndIf
 
 ;~    Stage 2: Game is running and checks for exit conditions.
@@ -158,7 +166,7 @@ While ProcessExists($readFEPrunning)
 	  EndIf
 
 ;~    If inactivity time has been reached while game is running, close game and focus MaLa.
-	  If(_Timer_GetIdleTime()>$readDelay) Then
+	  If (_Timer_GetIdleTime()>$readDelay) Then
 		 ProcessClose($gamePID)
 		 WinActivate($readFEPwindow)
 		 $windowName = ""
