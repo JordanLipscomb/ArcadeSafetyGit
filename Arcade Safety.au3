@@ -41,14 +41,14 @@
 
 ;~ Reads single data items from the .ini and sets as variables.
 ;~ Old .ini file path: "C:\Emulators\ArcadeSafety\Arcade Safety Settings.ini"
-Global $readFEPexe = IniRead("E:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "FrontEndProgram", "FEPexe", "Error")
-Global $readFEPrunning = IniRead("E:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "FrontEndProgram", "FEPrunning", "Error")
-Global $readFEPwindow = IniRead("E:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "FrontEndProgram", "FEPwindow", "Error")
-Global $readDelay = IniRead("E:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "ExecutionDelayInMilliseconds", "ED", "Error")
-Global $focusDelay = IniRead("E:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "ExecutionDelayInMilliseconds", "EDtwo", "Error")
-Global $readECGK = IniRead("E:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "ExitCurrentGameKey", "ECGK", "Error")
-Global $readWCQ = IniRead("E:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "WindowCLASSQuantity", "WCQ", "Error")
-Global $readQuantity = IniRead("E:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "GameQuantity", "GQ", "Error")
+Global $readFEPexe = IniRead("G:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "FrontEndProgram", "FEPexe", "Error")
+Global $readFEPrunning = IniRead("G:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "FrontEndProgram", "FEPrunning", "Error")
+Global $readFEPwindow = IniRead("G:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "FrontEndProgram", "FEPwindow", "Error")
+Global $readDelay = IniRead("G:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "ExecutionDelayInMilliseconds", "ED", "Error")
+Global $focusDelay = IniRead("G:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "ExecutionDelayInMilliseconds", "EDtwo", "Error")
+Global $readECGK = IniRead("G:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "ExitCurrentGameKey", "ECGK", "Error")
+Global $readWCQ = IniRead("G:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "WindowCLASSQuantity", "WCQ", "Error")
+Global $readQuantity = IniRead("G:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "GameQuantity", "GQ", "Error")
 
 ;~ Variables
 Global $gamePID = 0
@@ -69,13 +69,13 @@ Global $windowClasses[""]
 
 ;~ Adds game .exe data from .ini file to the $gameList array.
 For $i = 0 To $readQuantity - 1
-   Global $readGame = IniRead("E:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "GameListStartsAtZero", "G" & $i, "Error")
+   Global $readGame = IniRead("G:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "GameListStartsAtZero", "G" & $i, "Error")
    _ArrayAdd($gameList, $readGame)
 Next
 
 ;~ Adds window class data from .ini file to the $windowClasses array.
 For $i = 0 To $readWCQ - 1
-   Global $readWC = IniRead("E:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "WindowCLASSstartsAtZero", "WC" & $i, "Error")
+   Global $readWC = IniRead("G:\Other computers\My Computer\gaim-arcade\ArcadeSafety\Arcade Safety Settings.ini", "WindowCLASSstartsAtZero", "WC" & $i, "Error")
    _ArrayAdd($windowClasses, $readWC)
 Next
 
