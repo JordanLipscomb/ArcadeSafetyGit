@@ -60,7 +60,7 @@ Global $hDLL = ""
 Global $gameList[""]
 Global $windowClasses[""]
 
-;~ Debugging
+;~ Debugging test
 ;~ ConsoleWrite($readFEPexe  & @CRLF)
 ;~ ConsoleWrite($readFEPrunning  & @CRLF)
 ;~ ConsoleWrite($readFEPwindow & @CRLF)
