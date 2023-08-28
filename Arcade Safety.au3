@@ -85,6 +85,8 @@ Next
 
 ;~ Starts running MaLa and sets it as focus window after a delay.
 Run($readFEPexe)
+Sleep(30000)
+WinActivate($readFEPwindow)
 
 ;~ Checks for certian conditions while MaLa is running.
 While ProcessExists($readFEPrunning)
